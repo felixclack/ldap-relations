@@ -5,3 +5,5 @@ task :travis do
   system "bundle exec rspec spec"
   raise "rspec spec failed!" unless $?.exitstatus == 0
 end
+
+task :default => :travis
