@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/felixclack/ldap-relations.png)](https://travis-ci.org/felixclack/ldap-relations)
 
+[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/felixclack/ldap-relations)
+
 An Arel inspired library to provide a relational algebra for LDAP filters.
 I'm using it in conjunction with the jruby-ldap library because the 
 ruby ldap libraries just don't cut it in Ruby 1.9.
