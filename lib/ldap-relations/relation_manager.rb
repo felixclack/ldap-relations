@@ -10,7 +10,7 @@ module Ldap
       }
 
       def initialize *args
-        @relations = []
+        self.relations = []
       end
 
       attr_accessor :relations
@@ -19,13 +19,13 @@ module Ldap
       #
       # Returns String
       def to_filter
-        relation = @relations.shift
-        case @relations.size
+        relation = relations.shift
+        case relations.size
         when 0
           "(#{relation.to_filter})"
         when 1
           "(" << RELATION_OPERATOR_MAPPINGS[@relations.first.operator] <<
-            "(#{relation.to_filter})(#{@relations.first.to_filter}))"
+            "(#{relation.to_filter})(#{relations.first.to_filter}))"
         end
       end
     end
