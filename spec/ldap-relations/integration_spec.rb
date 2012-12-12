@@ -11,32 +11,57 @@ class Directory
 
   def initialize params={}
     self.manager = LRel::RelationManager.new
-    manager.relations << LRel::Relation.new(objectCategory: 'person')
   end
 
   attr_accessor :manager
 
   def where params
-    params.each do |k, v|
-      manager.relations << LRel::Relation.new("#{k}" => v)
+    query = params.shift
+    manager.relations << LRel::Relation.new(query.first.to_s => query.last)
+    if !params.empty?
+      self.and(params)
     end
     self
   end
 
-  def all
-    perform
+  def and params
+    query = params.shift
+    relation = LRel::Relation.new(query.first.to_s => query.last)
+    if params.any?
+      LRel::And.new(relation, self.and(params))
+    else
+      relation
+    end
   end
 
-  private
-    def perform
-      manager.to_filter
-    end
+  def or params
+    manager.relations = LRel::Or.new(manager.relations, LRel::Relation.new(params))
+    self
+  end
+
+  def default_relation
+    LRel::Relation.new(objectCategory: 'person')
+  end
+
+  def to_filter
+    manager.relations = LRel::And.new(default_relation, manager.relations)
+    manager.to_filter
+  end
+
+  alias :all :to_filter
 end
 
 describe "integration" do
   let(:directory) { Directory.where givenname: 'test' }
 
   it 'combines the provided the filter with the default' do
-    directory.all.should == "(&(objectCategory=person)(givenname=test))"
+    directory.to_filter.should == "(&(objectCategory=person)(givenname=test))"
+  end
+
+  context 'chaining multiple or filters' do
+    it 'nests the filters in pairs' do
+      directory.or(sn: 'test').or(mail: 'test').to_filter.
+        should == "(&(objectCategory=person)(|(|(givenname=test)(sn=test))(mail=test)))"
+    end
   end
 end

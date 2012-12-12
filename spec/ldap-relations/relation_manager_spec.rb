@@ -4,8 +4,8 @@ require 'ldap-relations/relation_manager'
 module Ldap::Relations
   describe RelationManager do
     let(:relation_manager) { RelationManager.new }
-    let(:relation) { stub 'Relation', to_filter: 'objectCategory=person', operator: :and }
-    let(:or_relation) { stub 'Relation', to_filter: 'sAMAccountName=test', operator: :or }
+    let(:relation) { stub 'Relation', to_filter: '(objectCategory=person)' }
+    let(:or_relation) { stub 'Or', to_filter: '(|(sAMAccountName=test)(mail=test))' }
 
     describe '#relations' do
       it 'stores a list of relations' do
@@ -23,16 +23,10 @@ module Ldap::Relations
         it { should == "(objectCategory=person)" }
       end
 
-      context 'with 2 relations' do
-        before { relation_manager.relations << relation << relation }
+      context 'with a Relation grouping' do
+        before { relation_manager.relations << or_relation }
 
-        it { should == "(&(objectCategory=person)(objectCategory=person))" }
-      end
-
-      context 'with an AND relation and an OR relation' do
-        before { relation_manager.relations << relation << or_relation }
-
-        it { should == "(|(objectCategory=person)(sAMAccountName=test))"}
+        it { should == "(|(sAMAccountName=test)(mail=test))" }
       end
     end
   end
